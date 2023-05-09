@@ -22,7 +22,7 @@ y_install = train_data["is_installed"]
 X_test = pd.read_csv("../recsys2023_data/test/000000000000.csv",sep='\t')
 X_test = X_test.iloc[:,1:] # Remove RowId
 
-# 对数据进行预处理和归一化(可选)
+# 对数据进行预处理（包括将离散值重新编码）和归一化
 df_cate = X_train.iloc[:,0:continous_features]
 df_cate.fillna(df_cate.mode().iloc[0],inplace=True)
 lbe = LabelEncoder() # 对离散特征进行编码
@@ -34,6 +34,20 @@ df_value.fillna(df_value.mean(),inplace=True)
 df_value = (df_value - df_value.mean()) / df_value.std()
 
 X_train = pd.concat([df_cate,df_value],axis=1)
+
+# 对测试集做同样处理
+df_cate = X_test.iloc[:,0:continous_features]
+df_cate.fillna(df_cate.mode().iloc[0],inplace=True)
+lbe = LabelEncoder() # 对离散特征进行编码
+for i in range(41):
+    df_cate[df_cate.columns[i]] = lbe.fit_transform(df_cate[df_cate.columns[i]])
+
+df_value = X_test.iloc[:,continous_features:]
+df_value.fillna(df_value.mean(),inplace=True)
+df_value = (df_value - df_value.mean()) / df_value.std()
+
+X_test = pd.concat([df_cate,df_value],axis=1)
+
 
 # 定义数据类
 class RecSysDataset(Dataset):
