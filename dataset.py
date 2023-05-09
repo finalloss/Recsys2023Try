@@ -79,7 +79,7 @@ class RecSysDataset(Dataset):
             # value of categorial features are one (one hot features)
             Xv_categorial = np.ones_like(dataI[continous_features:])
             Xv_coutinous = dataI[:continous_features]
-            Xv = torch.from_numpy(np.concatenate((Xv_categorial, Xv_coutinous)).astype(np.int32))
+            Xv = torch.from_numpy(np.concatenate((Xv_categorial, Xv_coutinous)))
             return Xi, Xv
 
     def __len__(self):
