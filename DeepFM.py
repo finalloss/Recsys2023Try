@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 
 class DeepFM(nn.Module):
     
     def __init__(self, feature_sizes, embedding_size=16,
-                 hidden_dims=[32, 32], num_classes=1, dropout=[0.5, 0.5], 
+                 hidden_dims=[64, 64, 64], num_classes=1, dropout=[0.3, 0.3, 0.3], 
                  use_cuda=True,cuda_name="cuda:0",verbose=False):
         """
         Initialize a new network
@@ -116,6 +116,7 @@ class DeepFM(nn.Module):
         # load input data
         model = self.train().to(device=self.device)
         criterion = F.binary_cross_entropy_with_logits
+        schedule = ReduceLROnPlateau(optimizer,'min',factor=0.5,patience=80,min_lr=1e-6,verbose=True)
 
         for _ in range(epochs):
             for t, (xi, xv, y) in enumerate(loader_train):
@@ -129,10 +130,13 @@ class DeepFM(nn.Module):
                 loss.backward()
                 optimizer.step()
 
+                schedule.step(loss)
+                
                 if verbose and t % print_every == 0:
                     print('Iteration %d, loss = %.4f' % (t, loss.item()))
                     self.check_accuracy(loader_val, model)
                     print()
+                
     
     def check_accuracy(self, loader, model):
         if loader.dataset.train:
@@ -162,7 +166,7 @@ class DeepFM(nn.Module):
                     xi = xi.to(device=self.device, dtype=self.dtype)  # move to device, e.g. GPU
                     xv = xv.to(device=self.device, dtype=torch.float)
                     total = model(xi,xv)
-                    preds = (F.sigmoid(total) > 0.5)
-                    f.write(preds)
-                    f.write('\n')
+                    preds = (F.sigmoid(total) > 0.5).int()
+                    for value in preds.cpu().numpy():
+                        f.write(str(value)+ '\n')
                 
