@@ -9,7 +9,7 @@ continous_features = 41
 click_feature = False
 
 # alldata_feature 代表读取的数据是第一个csv还是全部csv all_data -True
-alldata_feature = False
+alldata_feature = True
 
 # 方便调参而定义的类，说明有哪些参数可以调整
 class Model_parameters():

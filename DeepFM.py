@@ -9,7 +9,7 @@ from args import click_feature
 
 class DeepFM(nn.Module):
     
-    def __init__(self, feature_sizes, embedding_size=16,nume_fea_size=38,
+    def __init__(self, feature_sizes, embedding_size=8,nume_fea_size=38,
                  hidden_dims=[64, 64, 64], num_classes=1, dropout=[0.3, 0.3, 0.3], 
                  use_cuda=True,cuda_name="cuda:0"):
         """
@@ -141,7 +141,7 @@ class DeepFM(nn.Module):
         model = self.train().to(device=self.device)
         criterion = nn.BCELoss()
         if lrd:
-            schedule = ReduceLROnPlateau(optimizer,'min',factor=0.5,patience=8,min_lr=1e-6,verbose=True)
+            schedule = ReduceLROnPlateau(optimizer,'min',factor=0.2,patience=3,min_lr=1e-6,verbose=True)
 
         train_loss = []
         val_loss = []
@@ -226,9 +226,9 @@ class DeepFM(nn.Module):
         plt.ylabel("CrossEntropyLoss")
         plt.title("CrossEntropyLoss of Train and Validation in each Iteration")
         if click_feature:
-            plt.savefig("./loss.png")
+            plt.savefig("./click_loss.png")
         else:
-            plt.savefig("./loss2.png")
+            plt.savefig("./install_loss.png")
 
     def Get_result(self,loader,model):
         if click_feature:

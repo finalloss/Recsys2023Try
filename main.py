@@ -13,8 +13,8 @@ loader_test = DataLoader(test_data,batch_size=512)
 print("Load Data finished...")
 
 # training
-model = DeepFM(feature_sizes, use_cuda=True,cuda_name='cuda')
-optimizer = optim.Adam(model.parameters(), lr=1e-4, weight_decay=0.0)
+model = DeepFM(feature_sizes, use_cuda=True,cuda_name='cuda:4')
+optimizer = optim.Adam(model.parameters(), lr=1e-2, weight_decay=0.0)
 print("Start Training...")
-model.fit(loader_train, loader_val, optimizer, epochs=100, verbose=True,print_every=200)
+model.fit(loader_train, loader_val, optimizer, epochs=100, verbose=True,print_every=500)
 model.Get_result(loader_test,model)
