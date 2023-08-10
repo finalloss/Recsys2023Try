@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from sklearn.metrics import log_loss
 from args import click_feature
 
 
@@ -35,7 +34,7 @@ class DeepFM(nn.Module):
         self.num_classes = num_classes
         self.dtype = torch.long
         self.cuda_name = cuda_name
-        self.activation = nn.ReLU()
+        self.activation = nn.Sigmoid()
         
         #  check if use cuda
         if use_cuda and torch.cuda.is_available():

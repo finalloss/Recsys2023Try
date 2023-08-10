@@ -23,11 +23,28 @@ test_data = pd.read_csv("../recsys2023_data/test/000000000000.csv",sep='\t')
 X_test = test_data.iloc[:,1:] # Remove RowId
 
 # 确定筛选特征
+# 相关性>0.02的特征 40
 features_name = ['f_2', 'f_3', 'f_4', 'f_6', 'f_8', 'f_10', 'f_11', 'f_12', 'f_14',
        'f_16', 'f_17', 'f_19', 'f_20', 'f_21', 'f_22', 'f_23', 'f_24', 'f_25',
        'f_32', 'f_34', 'f_35', 'f_37', 'f_40', 'f_41', 'f_42', 'f_48', 'f_49',
        'f_50', 'f_51', 'f_55', 'f_56', 'f_57', 'f_58', 'f_59', 'f_65', 'f_68',
        'f_69', 'f_72', 'f_78', 'f_79']
+# 相关性>0.03的特征 29
+# features_name = ['f_2', 'f_3', 'f_6', 'f_8', 'f_10', 'f_11', 'f_12', 'f_16', 'f_17',
+#        'f_19', 'f_20', 'f_21', 'f_22', 'f_23', 'f_24', 'f_25', 'f_34', 'f_37',
+#        'f_40', 'f_51', 'f_55', 'f_56', 'f_57', 'f_58', 'f_59', 'f_65', 'f_68',
+#        'f_69', 'f_78']
+# 相关性>0.04的特征 22
+# features_name = ['f_2', 'f_6', 'f_11', 'f_12', 'f_16', 'f_17', 'f_19', 'f_20', 'f_21',
+#        'f_22', 'f_23', 'f_24', 'f_25', 'f_51', 'f_55', 'f_56', 'f_57', 'f_58',
+#        'f_59', 'f_65', 'f_68', 'f_78']
+# 相关性>0.05的特征 14
+# features_name = ['f_2', 'f_6', 'f_12', 'f_16', 'f_17', 'f_19', 'f_20', 'f_21', 'f_22',
+    #    'f_51', 'f_58', 'f_59', 'f_65', 'f_68']
+# 相关性>0.06的特征 10
+# features_name = ['f_2', 'f_6', 'f_12', 'f_16', 'f_17', 'f_20', 'f_22', 'f_58', 'f_59',
+#        'f_68']
+
 X_train = X_train[features_name]
 X_test = X_test[features_name]
 
@@ -36,9 +53,14 @@ X_test = X_test[features_name]
 all_data = pd.concat([X_train,X_test])
 df_cate = all_data.iloc[:,0:continous_features]
 df_cate.fillna(df_cate.mode().iloc[0],inplace=True)
+
+# 类别特征处理方式1
 lbe = LabelEncoder() # 对离散特征进行编码
 for i in range(continous_features):
     df_cate[df_cate.columns[i]] = lbe.fit_transform(df_cate[df_cate.columns[i]])
+
+# 类别特征处理方式2
+# df_cate = df_cate - df_cate.min()
 
 df_value = all_data.iloc[:,continous_features:]
 df_value.fillna(df_value.mean(),inplace=True)
@@ -47,10 +69,10 @@ df_value = (df_value - df_value.mean()) / df_value.std()
 all_data = pd.concat([df_cate,df_value],axis=1)
 
 # 得到feature_sizes
-feature_sizes = []
-for i in range(X_train.shape[1]):
-    size = all_data.iloc[:,i].value_counts().shape[0]
-    feature_sizes.append(size)
+# feature_sizes = []
+# for i in range(X_train.shape[1]):
+#     size = all_data.iloc[:,i].value_counts().shape[0]
+#     feature_sizes.append(size)
 
 # 还原回去
 n = train_data.shape[0]
@@ -59,9 +81,9 @@ X_test = all_data.iloc[n:,:]
 
 # 划分训练集和验证集 
 if click_feature:
-    train_x,val_x,train_y,val_y = train_test_split(X_train,y_click,test_size=0.2,stratify=y_click)
+    train_x,val_x,train_y,val_y = train_test_split(X_train,y_click,test_size=0.2,stratify=y_click, random_state=0)
 else:
-    train_x,val_x,train_y,val_y = train_test_split(X_train,y_install,test_size=0.2,stratify=y_install)
+    train_x,val_x,train_y,val_y = train_test_split(X_train,y_install,test_size=0.2,stratify=y_install, random_state=0)
 
 # 定义数据类
 class RecSysDataset(Dataset):
