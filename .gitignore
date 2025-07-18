@@ -1,1 +1,81 @@
 data/
+
+# =================================================================
+# General
+# =================================================================
+
+# macOS metadata files
+.DS_Store
+__MACOSX/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+
+# =================================================================
+# Python
+# =================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+
+# =================================================================
+# Project Specific Files
+# =================================================================
+
+# Competition provided evaluation script
+evaluation.py
+
+# Generated PDF and Markdown files from notes
+Recsys.pdf
+Recsys.md
+
+# LaTeX build artifacts and temporary files in the report directory
+report/*.aux
+report/*.log
+report/*.out
+report/*.pdf
+report/*.synctex.gz
+report/template.log
+report/template.pdf
+
+# Reference materials and notes
+Material/
+
+# Final PDF report (if you prefer to only keep the source)
+# You can uncomment the line below if you don't want to track the final PDF
+# Recsys_Report.pdf

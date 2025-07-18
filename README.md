@@ -1,54 +1,56 @@
-# Recsys2023Try
-For Recsys 2023, private projects -> public projects
+# Recsys Challenge 2023 推荐系统挑战赛项目
 
-Recsys Challenge 2023 is a competition in the field of recommendation systems, aiming to explore the performance of recommendation algorithms on large-scale data sets. Provide innovative solutions for research and applications in the field of recommendation systems. This article aims to detail our participation in the Recsys Challenge The work on the 2023 data classification task includes problem description, problem analysis, experimental plan, experimental process, and final results and analysis.
+本项目是为 [Recsys Challenge 2023](https://sharechat.com/recsys2023) 提交的解决方案。该竞赛旨在探索推荐算法在Sharechat 和 Moj 应用提供的真实大规模广告数据集上的性能，为推荐系统领域的研究和应用提供创新性的解决方案，尤其关注用户隐私和深度漏斗优化。
 
-# Brief introduction
+## 团队信息
 
-## [About](http://www.recsyschallenge.com/2023/#top)
+* **队伍名称:** Baker street Irregulars
 
-The RecSys 2023 Challenge will be organized by Sarang Brahme, Rahul Agarwal (ShareChat), Abhishek Srivastava (IIM Visakhapatnam, India), Liu Yong (Huawei, Singapore) and Athirai Irissappane (Amazon, USA) based on the data provided by ShareChat. This year’s challenge will focus on online advertising, improving deep funnel optimization, and user privacy.
+## 任务描述
 
-The challenge is brought to you by ShareChat. [ShareChat](https://sharechat.com/about) is India’s largest homegrown social media company, with 400+ million MAUs across all its platforms. Headquartered in Bengaluru, ShareChat is spreading its team globally across India, the USA, and Europe. We have the best-in-class AI & ML technology and the strongest feed ranking system powering our growth. We aim to create a million monetizable creators with USD 450 million in creator earnings across ShareChat and Moj by 2025.
+本次挑战赛的任务是预测在给定的广告展示下，用户是否会点击广告 (`is_clicked`) 以及是否会安装应用 (`is_installed`)。训练数据由过去两周的二次抽样印象、点击和安装组成，目标是预测第15天的安装概率。
 
-## [Challenge Task](http://www.recsyschallenge.com/2023/#top)
+数据集包含约1000万随机用户的行为记录，特征是匿名的，包括类别特征和数值特征，不提供具体语义。
 
-Online advertising has been a multi-billion dollar industry since the early 2000 and has played a significant role in the growth of the internet. The key advantage of online advertising over conventional mass advertising is its inherent ability to personalize to users, democratizing advertising and enabling businesses of all sizes to participate, and providing the measurable impact of money spent to the advertisers. Over the past two decades, the nature of online advertising has also evolved tremendously from pure banner-based advertising, where advertisers were charged based on the number of ad impressions, to deep funnel optimizations, where advertisers can optimize for eventual sales.
+**评价指标**：比赛使用归一化交叉熵 (Normalised-Entropy) 来衡量模型预测的准确性。
 
-The efficacy of deep funnel optimization required extensive personalization and opened up rich problems in real-time auction design, large-scale machine learning, modeling delayed feedback, and behavioral understanding. As these systems matured, we also started developing a rich understanding of the need to preserve user privacy, ensure AI fairness, and prevent adversarial exploitation of the platform. In this challenge, we aim to provide a real-world ad dataset from the Sharechat and Moj apps to act as a benchmark for research into deep funnel optimization with a focus on user privacy
+## 解决方案
 
-## [DataSet](http://www.recsyschallenge.com/2023/#top)
+我们的解决方案将此问题视为一个分类任务，并采用模型集成的策略来提高预测的准确性和鲁棒性。
 
-1. The dataset corresponds to roughly 10M random users who visited the ShareChat + Moj app over three months. We have sampled each user's activity to generate **10 impressions** corresponding to each user. Our target variable is whether there was an install for an app by the user or not.
-2. To represent a user, several features are provided:
-   1. **Demographic features**: These include age, gender, and geographic location from where the user is accessing the Sharechat/Moj app. The sampling of the users in (1) is done such that we have an approximately uniform distribution of users across the demographic features. The user's location is hashed to a 32-bit to anonymize the data.
-   2. **Content preference embeddings**: These embeddings are trained based on the users' consumption of the various non-ad content on the Sharechat/Moj app.
-   3. **App affinity embeddings**: These embeddings are trained based on the past apps installed by the user on our platform.
-3. We also have features corresponding to ads
-   1. **Ad categorical features**: These features represent different characteristics of an ad, including the size of the ad, the category of the ad etc. The features are hashed to 32-bit to anonymize the data
-   2. **Ad embedding**: These represent the actual video/image content of the ad.
-4. To capture the historical interactions between users and ads, we also provide
-   1. **Count features**: These features represent the user interaction with ads, advertisers, and categories of advertisers over different lengths of a time window
-5. Every row of the data has an associated numeric id and represents an ad impression shown to the user and whether it resulted in a click on the ad and subsequently an install or not.
-6. We do not provide the semantics of the individual features.
-7. The training data consists of subsampled impressions/clicks/installs from the past 2 weeks and aims to predict the probability of install for the 15th day.
+### 1. 数据预处理与特征工程
 
-## [Prize](http://www.recsyschallenge.com/2023/#top)
+由于训练集文件较多，我们使用 `glob` 进行统一读取。核心步骤如下：
+* **特征选择**: 我们首先计算了所有特征与目标标签 (`is_installed`) 之间的相关性，并筛选出相关性绝对值大于0.02的特征用于模型训练。这帮助我们在不理解特征具体语义的情况下，识别出对预测结果影响较大的特征。
+* **数据处理**:
+    * 将训练集和测试集合并，对类别特征进行统一的标签编码 (`LabelEncoder`)。
+    * 对数值特征进行标准化处理。
+    * 使用 `train_test_split` 将处理后的数据划分为训练集和验证集。
 
-- First three teams from the participants - $2500/$1500/$1000
-- Special prize for the academic teams - $1500
+### 2. 模型架构
 
-# [Timeline](http://www.recsyschallenge.com/2023/#top)
+我们采用了两种强大的模型进行集成：
 
-| When?                         | What?                                                        |
-| :---------------------------- | :----------------------------------------------------------- |
-| 27 March, 2023                | **Start RecSys Challenge**Release dataset                    |
-| 11 Apr, 2023                  | **Submission System Open**                                   |
-| 13 Apr, 2023                  | **Leaderboard live**                                         |
-| 22nd June, 2023 18 June, 2023 | **End RecSys Challenge**                                     |
-| 28th June, 2023 24 June, 2023 | **Final Leaderboard & Winners**EasyChair open for submissions |
-| 3rd July, 2023 30 June, 2023  | **Code Upload**Upload code of the final predictions          |
-| 14 July, 2023                 | **Paper Submission Due**                                     |
-| 1 August, 2023                | **Paper Acceptance Notifications**                           |
-| 14 August, 2023               | **Camera-Ready Papers**                                      |
-| Sept 3rd week                 | **RecSys Challenge Workshop**@ [ACM RecSys 2023](https://recsys.acm.org/recsys23/) |
+* **DeepFM (深度因子分解机)**: 该模型能够同时学习低阶和高阶的特征交互，无需复杂的特征工程。我们将原始特征输入共享的Embedding层，然后分别送入FM部分和DNN部分。
+    * **FM部分**: 捕捉一阶和二阶的特征交叉。
+    * **DNN部分**: 通过多层前馈神经网络学习高阶的复杂特征关系。
+    * 最终将两部分的输出结合，通过Sigmoid函数得到预测概率。
+
+* **XGBoost (eXtreme Gradient Boosting)**: 这是一个高效且强大的集成学习算法。我们使用 `XGBClassifier` 对筛选后的特征进行训练。XGBoost通过构建多个决策树并将其结果进行组合，能够有效地处理稀疏数据并获得很高的预测精度。
+
+### 3. 模型集成
+
+为了得到最终的预测结果，我们将DeepFM和XGBoost两个模型输出的预测概率进行加权平均。经过多次提交测试，我们发现简单的算术平均能取得最好的效果。
+
+## 项目亮点与创新
+
+* **模型融合**: 创造性地将深度学习模型 (DeepFM) 与传统的集成学习模型 (XGBoost) 相结合。DeepFM擅长自动学习复杂的特征交互，而XGBoost在处理表格数据方面表现出色。两者的结合使得模型更加稳健，优势互补。
+* **自动化特征筛选**: 在特征完全匿名的挑战下，我们没有进行盲目的人工特征组合，而是通过计算特征与标签的相关性，自动化地筛选出重要特征，为模型训练提供了更有价值的输入。
+* **端到端的解决方案**: 项目包含了从数据分析、预处理、特征选择、模型训练、调参到模型集成的完整流程。
+
+## 最终成绩
+
+我们的解决方案在 **Academia Leaderboard** 上取得了优异的成绩：
+
+* **最终得分**: 6.342383
+* **最终排名**: **8 / 54**
